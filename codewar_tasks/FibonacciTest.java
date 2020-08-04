@@ -1,24 +1,31 @@
 package codewar_tasks;
 
-import java.util.Arrays;
-import java.util.Random;
-import java.util.Scanner;
+import java.util.*;
+import java.util.stream.IntStream;
+import java.util.stream.Stream;
 
 public class FibonacciTest {
 
 	/*
-	 * Получить от пользователя на вход число N Записать в массив ряд Фибоначчи
-	 * длиной N Сгенерировать 2 случайных числа (X, Y) в пределах N Посчитать
-	 * сумму всех чисел из сохраненного массива, имеющие индекс от X до Y
-	 * (включительно)
+	 * Fibonacci numbers:
+	 * User enters length of Fibonacci sequence
+	 * Application generates random range in this sequence (start\end elements),
+	 * and culculates sum of all elements in this range
 	 */
 
 	public static void main(String[] args) {
+		Operationable<Integer> rangedArray = (array, range)  -> {
+			// increase second parameter due to it's not excluded in border (copyOfRange() specific)
+			int[] newArray = Arrays.copyOfRange(array,range[0], ++range[1]);
+			return newArray;
+		};
+
 		int sqnceLength = readN();
-		double[] arrOfNumbers = fillArray(sqnceLength);
-		int[] range = generateRange(sqnceLength);
-		double sum = findSum(range, arrOfNumbers);
-		System.out.println("\nSum of all digits from position " + range[0] + " to " + range[1] + " is: " + sum);
+		int [] fibonacciNum = fillArray(sqnceLength);
+		int [] range = generateRange(sqnceLength);
+		int sum = findSum(rangedArray.calculate(fibonacciNum, range));
+		String s = String.format("\nSum of all digits in range is %s", sum);
+		System.out.println(s);
 	}
 
 	/**
@@ -57,16 +64,17 @@ public class FibonacciTest {
 	 * @param sqnceLength
 	 * @return array of double from 0 to sqnceLength
 	 */
-	static double[] fillArray(int sqnceLength) {
-		double[] arr = new double[sqnceLength];
+	static int[] fillArray(int sqnceLength) {
+		int[] arr = new int[sqnceLength];
 		arr[0] = 0;
 		arr[1] = 1;
+
 		for (int i = 2; i < sqnceLength; i++) {
 			arr[i] = arr[i - 1] + arr[i - 2];
 		}
 
 		System.out.println("Fibonacci row is: ");
-		arrayToString(arr);
+		System.out.println(Arrays.toString(arr));
 		return arr;
 
 	}
@@ -85,54 +93,33 @@ public class FibonacciTest {
 			x = randomGenerator.nextInt(sqnceLength);
 			y = randomGenerator.nextInt(sqnceLength);
 		}
-		int[] range = { x, y };
-		Arrays.sort(range); // sorts values ascending
-		System.out.print("\nRandom generated numbers are: ");
-		arrayToString(range);
-		return range;
+		int[] range  = {x, y};
+		Arrays.sort(range);
+		System.out.println(String.format("\nRange for calculation: from %s element to %s element",range[0], range[1]));
+		return  range;
 	}
 
 	/**
 	 * 
-	 * @param range
-	 *            - X,Y
-	 * @param arrOfNumbers
+	 * @param rangedArray
 	 *            - sequence of numbers
 	 * @return sum of elements from X, to Y
 	 */
-	static double findSum(int[] range, double[] arrOfNumbers) {
-		//correct first and last index to start count from 1
-		int indX = range[0]-1;
-		int indY = range[1]-1;
-		
-		double sum = arrOfNumbers[indX] + arrOfNumbers[indX + 1];
-		indX++;
-		for (; indX < indY; indX++) {
-			sum = sum + arrOfNumbers[indX + 1];
-		}
-		return sum;
-	}
-	
-	/**
-	 * Prints Fibonacci sequence
-	 * @param arr
-	 */
-	static void arrayToString(double[] arr) {
-		System.out.println();
-		for (double i : arr) {
-			System.out.print(i + " ");
-		}
-	} 
-	
-	/**
-	 *	Prints X, Y. 
-	 * @param arr
-	 */
-	static void arrayToString(int[] arr) {
-		System.out.println();
-		for (int i : arr) {
-			System.out.print(i + " ");
-		}
+	static int findSum(int[] rangedArray) {
+		return IntStream.of(rangedArray).sum();
 	}
 
+	/**
+	 *
+	 * @param rangedArray
+	 *            - sequence of numbers
+	 * @return multiplication of elements from X, to Y
+	 */
+	static int findMultipl(int[] rangedArray) {
+
+		Stream<Integer> numbers = rangedArray.stream();
+
+		Optional<Integer> result = numbers.reduce((x,y) -> y * x);
+		return result.get();
+	}
 }
